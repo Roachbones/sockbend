@@ -18,30 +18,21 @@ class Bender():
         self.tfm.set_input_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
         self.tfm.set_output_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
         self.tfm.set_globals(dither=True, verbosity=0)
-        self.EFFECTS = {
-            "allpass": self.tfm.allpass,
-            "highpass": self.tfm.highpass,
-            "echo": self.tfm.echo,
-            "noisered": self.tfm.noisered,
-            "lowpass": self.tfm.lowpass
-        }
         self.infilepath = infilepath
         self.inheadpath = ORGANS + infilepath.replace("/","_") + "_head"
         self.inbodypath = ORGANS + infilepath.replace("/","_") + "_body"
         self.bodylength = guillotine.decapitate(infilepath, self.inheadpath, self.inbodypath)
 
-        #effectkwargs example: {"highpass": {frequency:500}}
+        #effectkwargs example: {"highpass": {frequency:500}} #nvm
+        #effects_and_kwargs example: [(self.tfm.highpass, {frequency:500}), (self.tfm.echo, {})]
 
-    def bend(self, effectkwargs, outfilename=None): #limited
+    def bend(self, effects_and_kwargs, outfilename=None): #limited
         #one input image, one effect, one output
         outfilename = outfilename or self.infilepath[:-4]+"_bent.bmp"
         logging.info("Bending " + self.infilepath + " to " + outfilename)
         try:
-            for effect in effectkwargs:
-                if effect in self.EFFECTS: #string, like "echo"
-                    self.EFFECTS[effect](**(effectkwargs[effect]))
-                else: #hopefully a tfm method, like self.tfm.echo
-                    effect(**(effectkwargs[effect]))
+            for effect, kwargs in effects_and_kwargs:
+                effect(**kwargs)
         except sox.core.SoxError: #probably due to invalid arguments
             self.tfm.clear_effects()
             raise    
