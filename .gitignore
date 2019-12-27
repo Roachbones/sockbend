@@ -1,0 +1,6 @@
+*.bmp
+*.gif
+*.png
+__pycache__/
+*.py[cod]
+*$py.class
