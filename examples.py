@@ -18,7 +18,7 @@ b = sockbend.Bender(EXAMPLE_INPUT_BMP)
 # out_path specifies where we'll save the bent image.
 # By default, it will save to socks_bent.bmp (assuming the input image is socks.bmp).
 
-b.bend([("highpass", {"frequency":500})], out_path="examples/ex_highpass_500.bmp")
+b.bend([("highpass", {"frequency":500})], out_path="examples/ex1_highpass_500.bmp")
 
 # Here's a more intricate example with multiple commands and arguments:
 effects_and_kwargs = [
@@ -36,7 +36,7 @@ effects_and_kwargs = [
     )
     #Other commands could go here. We could even do the same command multiple times.
 ]
-b.bend(effects_and_kwargs, out_path="examples/ex_highpass_500_0.6_echo.bmp")
+b.bend(effects_and_kwargs, out_path="examples/ex1_highpass_500_0.6_echo.bmp")
 
 # Here's a different style of using Bender.bend.
 # It's harder and I don't recommend it; feel free to skip this example.
@@ -45,7 +45,7 @@ b.bend(effects_and_kwargs, out_path="examples/ex_highpass_500_0.6_echo.bmp")
 # Here we directly call the Bend
 # This is equivalent to doing b.bend([("echo",{})], out_path="examples/ex_echo.bmp")
 b.tfm.echo() #Queue echo effect
-b.bend(out_path="examples/ex_echo.bmp") #Bend with queued effects. This flushes the effects queue.
+b.bend(out_path="examples/ex1_echo.bmp") #Bend with queued effects. This flushes the effects queue.
 
 
 # Now, what about gifs?
@@ -60,7 +60,7 @@ b.bend(out_path="examples/ex_echo.bmp") #Bend with queued effects. This flushes 
 # Here's an example using the allpass filter, but with an increasing frequency argument.
 b.bend_to_gif(
     [[("allpass", {"frequency":500+50*i})] for i in range(24)],
-    out_path="examples/ex_allpass_500to1700.gif",
+    out_path="examples/ex1_allpass_500to1700.gif",
 )
 # That list comprehension is kind of messy,
 # but it basically just does the same thing as the first example,
@@ -73,7 +73,7 @@ b.bend_to_gif(
 # Here's an example like the last one, but with a seamless loop.
 b.bend_to_gif(
     [[("allpass", {"frequency":500+1200*sockbend.sin_up_down(i/24)})] for i in range(24)],
-    out_path="examples/ex_allpass_500to1700to500.gif",
+    out_path="examples/ex1_allpass_500to1700to500.gif",
 )
 
 
@@ -91,7 +91,7 @@ mb.bend_uniform(
             }
         )
     ],
-    gif_path="examples/ex_bass_0.2.gif"
+    gif_path="examples/ex2_bass_0.2.gif"
 )
 
 # In that example, we applied the same effect to every frame.
@@ -110,7 +110,7 @@ mb.bend_varying(
             )
         ] for i in range(n)
     ],
-    gif_path="examples/ex_bass_0.2to2.2to0.2.gif"
+    gif_path="examples/ex2_bass_0.2to2.2to0.2.gif"
 )
 
 # Here's a similar one. I like the allpass filter.
@@ -125,5 +125,5 @@ mb.bend_varying(
             )
         ] for i in range(n)
     ],
-    gif_path="examples/ex_allpass_500to1700to500.gif"
+    gif_path="examples/ex2_allpass_500to1700to500.gif"
 )
