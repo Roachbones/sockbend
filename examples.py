@@ -60,7 +60,7 @@ b.bend(out_path="examples/ex_echo.bmp") #Bend with queued effects. This flushes 
 # Here's an example using the allpass filter, but with an increasing frequency argument.
 b.bend_to_gif(
     [[("allpass", {"frequency":500+50*i})] for i in range(24)],
-    out_path="examples/ex_highpass_500to1700.gif",
+    out_path="examples/ex_allpass_500to1700.gif",
 )
 # That list comprehension is kind of messy,
 # but it basically just does the same thing as the first example,
@@ -73,7 +73,7 @@ b.bend_to_gif(
 # Here's an example like the last one, but with a seamless loop.
 b.bend_to_gif(
     [[("allpass", {"frequency":500+1200*sockbend.sin_up_down(i/24)})] for i in range(24)],
-    out_path="examples/ex_highpass_500to1700to500.gif",
+    out_path="examples/ex_allpass_500to1700to500.gif",
 )
 
 
