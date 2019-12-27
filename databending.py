@@ -54,8 +54,7 @@ class Bender:
         """
         Example: "echo" -> self.tfm.echo
         Used so we don't have to keep referring to the functions directly,
-        so effects_and_kwargs stuff is easier to write,
-        especially in MultiBender.
+        so effects_and_kwargs stuff is easier to write, especially for MultiBender.
         """
         assert hasattr(self.tfm, method_name)
         return getattr(self.tfm, method_name)

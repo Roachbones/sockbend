@@ -5,10 +5,9 @@ Basically just do make_gif to make a gif.
 """
 
 import glob
-import wand.image
-import wand.drawing
-import wand.exceptions
 import warnings
+import logging
+import wand.image, wand.drawing, wand.exceptions
 
 def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
     """
@@ -24,6 +23,7 @@ def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
     if not delays:
         delays = [delay for _ in frame_paths]
     print("total frames to animate: ", len(frame_paths))
+    #this has a lot of with statements but that's how you do it i guess
     with wand.image.Image() as animation:
         for i, frame_path in enumerate(frame_paths):
             print(i, end=" ")
@@ -40,11 +40,11 @@ def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
                 #d=wand.drawing.Drawing()
                 #d(frame)
 
-        print("saving")
+        logging.debug("saving")
         animation.type = "optimize"
         gif_path = gif_path or frame_paths[0][:-4]+".gif"
         animation.save(filename=gif_path)
-        print("saved", gif_path)
+        logging.info("saved " + gif_path)
 
 def split_gif(gif_path):
     """
