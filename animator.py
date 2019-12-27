@@ -9,6 +9,8 @@ import warnings
 import logging
 import wand.image, wand.drawing, wand.exceptions
 
+ZFILLAMOUNT = 4
+
 def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
     """
     Just takes a bunch of image paths and turns it into a gif in a way that makes sense,
@@ -17,9 +19,9 @@ def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
     Either specify delay or delays. Or neither, in which case delay = 8.
     Makes a good guess for where to save the gif if gif_path is unspecified.
     """
-    assert not (delay and delays)
+    assert not (delay and delays) #only specify one
     if not (delay or delays):
-        delay = 8 #hundredths of a second
+        delay = 8 #default to 8 hundredths of a second
     if not delays:
         delays = [delay for _ in frame_paths]
     print("total frames to animate: ", len(frame_paths))
@@ -37,16 +39,14 @@ def make_gif(frame_paths, gif_path=None, delay=None, delays=None):
             for frame in animation.sequence:
                 frame.delay = delays[i]
                 frame.dispose = "background"
-                #d=wand.drawing.Drawing()
-                #d(frame)
 
         logging.debug("saving")
         animation.type = "optimize"
         gif_path = gif_path or frame_paths[0][:-4]+".gif"
         animation.save(filename=gif_path)
-        logging.info("saved " + gif_path)
+        print("saved", gif_path)
 
-def split_gif(gif_path):
+def split_gif(gif_path, frame_path_pattern="frames/frame_{}.bmp"):
     """
     Just splits a gif into frames in a way that makes sense
     so you don't have to get confused about imagemagick.
@@ -57,7 +57,7 @@ def split_gif(gif_path):
     with wand.image.Image(filename=gif_path) as image:
         image.coalesce() #kind of de-compress the frames
         for i, frame in enumerate(image.sequence):
-            frame_path = gif_path + "_" + str(i).zfill(4) + ".bmp"
+            frame_path = frame_path_pattern.replace("{}",str(i).zfill(ZFILLAMOUNT))
             frame_image = wand.image.Image(frame)
             frame_image.compression = "no" #we want uncompressed bmp, not rle-encoded.
             frame_image.save(filename=frame_path)

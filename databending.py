@@ -1,11 +1,13 @@
 """
-databending.py
+sockbend.py
 Uses sox to edit bmp files as if they were sound files,
 creating some cool effects.
 
 todo:
     convert everything to snake_case
     add a big examples script
+    Bender should automatically convert non-bitmaps to bitmaps
+    replace example images with public domain ones
 todo eventually?:
     add image rotation options for bending along pixel columns rather than rows
     add image channel separation options; chroma and luma (good idea emily)
@@ -14,7 +16,7 @@ todo eventually?:
 """
 
 import guillotine #for isolating image arrays from bmp files
-import animator #for compiling images into a gif
+import animator #for compiling frames into a gif, and splitting a gif into its frames
 
 import sox #for "audio" editing
 import math
@@ -101,29 +103,29 @@ class Bender:
         
         self.tfm.clear_effects()
 
-    def bend_to_gif(self, effects_and_kwargs_sequence, frame_name_pattern=None):
+    def bend_to_gif(self, effects_and_kwargs_sequence, out_path=None, frame_path_pattern="frames/frame_{}.bmp", delay=8):
         """
         Makes a gif out of a bunch of bends.
         Basically calls self.bend a bunch of times and
         compiles the frames into a gif.
         effects_and_kwargs_sequence should be a sequence of
         effects_and_kwargs things. (see self.bend for an example of those)
+        frame_name_pattern specifies how to name the frames. The {} is replaced by a zfilled frame number.
+        delay is the delay between frames, specified in hundredths of a second.
         """
-        frame_name_pattern = frame_name_pattern or "frames/"+self.in_path[:-4]+"_{}.bmp"
-        i = 0
+        frame_path_pattern = frame_path_pattern or "frames/"+self.in_path[:-4]+"_{}.bmp"
+        out_path = out_path or self.in_path+".gif"
         new_frame_paths = []
-        for effects_and_kwargs in effects_and_kwargs_sequence:
-            new_frame_path = frame_name_pattern.replace("{}",str(i).zfill(ZFILLAMOUNT))
+        for i, effects_and_kwargs in enumerate(effects_and_kwargs_sequence):
+            new_frame_path = frame_path_pattern.replace("{}",str(i).zfill(ZFILLAMOUNT))
             self.bend(effects_and_kwargs, new_frame_path)
             new_frame_paths.append(new_frame_path)
-            i += 1
-        animator.make_gif(new_frame_paths, gif_path=self.in_path+".gif")
+        animator.make_gif(new_frame_paths, gif_path=out_path, delay=delay)
 
-class MultiBender: #doesn't work yet
+class MultiBender:
     """
     Bends N images into N images.
     Would be used for bending a video or a gif.
-    I haven't tested this one.
     """
     def __init__(self, gif_path=None, frame_paths=None):
         assert bool(frame_paths) ^ bool(gif_path) #frame_paths xor gif_path; exactly one should be supplied
@@ -133,29 +135,27 @@ class MultiBender: #doesn't work yet
             frame_paths, self.delays = animator.split_gif(gif_path)
         
         self.benders = [Bender(frame_path) for frame_path in frame_paths]
+        self.number_of_frames = len(self.benders)
 
     def bend_uniform(self, effects_and_kwargs, **kwargs):
         """
         Bends each image using the same effect, specified by effects_and_kwargs.
-        Special case of bend_varying.
+        Special case of bend_varying; see that function for more information.
         """
         #call bend_varying but with the same effects_and_kwargs for every frame
         self.bend_varying([effects_and_kwargs] * len(self.benders), **kwargs)
 
-    def bend_varying(self, effects_and_kwargs_sequence, gif_path=None, clobber=False):
+    def bend_varying(self, effects_and_kwargs_sequence, gif_path=None, frame_path_pattern="frames/frame_{}.bmp"):
         """
         Bends each image using the corresponding effect specified by effects_and_kwargs_sequence.
         If gif_path is specified, compiles the bent images into a gif.
-        If clobber=True, clobbers (replaces) the original images with the bent ones.
+        If clobber=True, clobbers (replaces) the original frames with the bent ones.
         """
         new_frame_paths = []
         assert len(effects_and_kwargs_sequence) == len(self.benders)
         for i, bender in enumerate(self.benders):
             effects_and_kwargs = effects_and_kwargs_sequence[i]
-            if clobber:
-                new_frame_path = bender.in_path
-            else:
-                new_frame_path = bender.in_path[:-4] + "_bent.bmp"
+            new_frame_path = frame_path_pattern.replace("{}",str(i).zfill(ZFILLAMOUNT))
             bender.bend(effects_and_kwargs, new_frame_path)
             new_frame_paths.append(new_frame_path)
         if gif_path:
