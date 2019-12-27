@@ -1,4 +1,4 @@
-import databending
+import sockbend
 
 # Here's the image we will bend today.
 # Replace this with another bmp if you want.
@@ -6,7 +6,7 @@ EXAMPLE_INPUT_BMP = "examples/socks.bmp"
 EXAMPLE_INPUT_GIF = "examples/golb.gif"
 
 # This object, the Bender, is used for bending a specific image.
-b = databending.Bender(EXAMPLE_INPUT_BMP)
+b = sockbend.Bender(EXAMPLE_INPUT_BMP)
 
 # Here's one way to bend the image.
 # Here we call b.bend with - bear with me here - a sequence of tuples,
@@ -67,12 +67,12 @@ b.bend_to_gif(
 # except with frequency arguments [500, 550, 600, 650 ... 1650, 1700].
 
 # What if we want our gifs to loop better?
-# A handy tool for that is databending.sin_up_down.
+# A handy tool for that is sockbend.sin_up_down.
 # It generates a sin curve that goes from 0 to 1 to 0.
 # Example: [sin_up_down(i/10) for i in range(10)] -> [0.0, 0.096, 0.345, 0.655, 0.905, 1.0, 0.905, 0.655, 0.345, 0.096]
 # Here's an example like the last one, but with a seamless loop.
 b.bend_to_gif(
-    [[("allpass", {"frequency":500+1200*databending.sin_up_down(i/24)})] for i in range(24)],
+    [[("allpass", {"frequency":500+1200*sockbend.sin_up_down(i/24)})] for i in range(24)],
     out_path="examples/ex_highpass_500to1700to500.gif",
 )
 
@@ -81,7 +81,7 @@ b.bend_to_gif(
 # For that, we'll want to use a MultiBender.
 # I'm not confident with how the MultiBender is used. I think it could be made more elegant.
 # For now, here's how it works. Let's bass-boost a gif.
-mb = databending.MultiBender(EXAMPLE_INPUT_GIF)
+mb = sockbend.MultiBender(EXAMPLE_INPUT_GIF)
 mb.bend_uniform(
     [
         (
@@ -105,7 +105,7 @@ mb.bend_varying(
             (
                 "bass",
                 {
-                    "gain_db": 0.2 + 2.0 * databending.sin_up_down(i/n)
+                    "gain_db": 0.2 + 2.0 * sockbend.sin_up_down(i/n)
                 }
             )
         ] for i in range(n)
@@ -120,7 +120,7 @@ mb.bend_varying(
             (
                 "allpass",
                 {
-                    "frequency": 500 + 1200 * databending.sin_up_down(i/n)
+                    "frequency": 500 + 1200 * sockbend.sin_up_down(i/n)
                 }
             )
         ] for i in range(n)

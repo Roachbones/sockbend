@@ -124,8 +124,7 @@ class Bender:
 
 class MultiBender:
     """
-    Bends N images into N images.
-    Would be used for bending a video or a gif.
+    Bends gifs. More generically, bends N images into N images.
     """
     def __init__(self, gif_path=None, frame_paths=None):
         assert bool(frame_paths) ^ bool(gif_path) #frame_paths xor gif_path; exactly one should be supplied
@@ -168,19 +167,3 @@ def sin_up_down(proportion):
     Example: [sin_up_down(i/10) for i in range(10)] -> [0.0, 0.096, 0.345, 0.655, 0.905, 1.0, 0.905, 0.655, 0.345, 0.096]
     """
     return 1-(math.cos(proportion*2*math.pi)+1)/2
-
-def test():
-    b = Bender("porygon-z.bmp")
-    b.bend({"highpass":{"frequency":500}})
-    b.bend_to_gif([[(b.tfm.highpass, {"frequency":500+50*i})] for i in range(16)])
-
-    b.bend_to_gif([[(b.tfm.allpass, {"frequency":500+500*sin_up_down(i/24)})] for i in range(24)]) #socks_goof
-
-    #outdated:
-    mb = MultiBender(sorted(glob.glob("frames/porygon-z_[0-9][0-9][0-9][0-9].bmp")))
-    mb.bend_uniform({"echo":{"n_echos":6, "delays":[1024]*6, "decays":[0.4]*6}}, gif_path="gif.gif")
-
-    #outdated:
-    #b.bend({"echo":{"n_echos":9,"delays":[random.random() for _ in range(9)],"decays":[random.random() for _ in range(9)]}})
-    #b.bend_to_gif([{"echo":{"n_echos":9,"delays":[(i+j+1)/39 for j in range(9)],"decays":[0.1 for _ in range(9)]}} for i in range(30)])
-    #b.bend_to_gif([{"allpass":{"frequency":100+50*sin_up_down(i/30)}} for i in range(30)])
