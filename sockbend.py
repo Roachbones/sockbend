@@ -4,10 +4,8 @@ Uses sox to edit bmp files as if they were sound files,
 creating some cool effects.
 
 todo:
-    convert everything to snake_case
-    add a big examples script
     Bender should automatically convert non-bitmaps to bitmaps
-    replace example images with public domain ones
+    replace example images with public domain ones?
 todo eventually?:
     add image rotation options for bending along pixel columns rather than rows
     add image channel separation options; chroma and luma (good idea emily)

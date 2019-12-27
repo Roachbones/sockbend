@@ -1,11 +1,11 @@
 import sockbend
 
-# Here's the image we will bend today.
-# Replace this with another bmp if you want.
+# Here's the bmp we will bend today. Replace it if you want.
 EXAMPLE_INPUT_BMP = "examples/socks.bmp"
+# Here's the gif we will bend today. Replace it if you want.
 EXAMPLE_INPUT_GIF = "examples/golb.gif"
 
-# This object, the Bender, is used for bending a specific image.
+# This object, the Bender, is used for bending a particular image.
 b = sockbend.Bender(EXAMPLE_INPUT_BMP)
 
 # Here's one way to bend the image.
