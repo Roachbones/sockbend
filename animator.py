@@ -1,10 +1,14 @@
+"""
+Uses imagemagick to compile images into gifs.
+I don't like imagemagick so this is kind of messy.
+Basically just do makegif to make a gif.
+"""
+
 import glob
 import wand.image
 import wand.drawing
 import wand.exceptions
 import warnings
-
-#i don't like imagemagick so this is sort of messy
 
 def makegif(framepaths, delay=8, gifpath=None):
     #framepaths = glob.glob(framenamepattern)
