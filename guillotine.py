@@ -2,12 +2,10 @@
 Guillotine
 
 For removing and reattaching BMP headers,
-so that the image array can be safely databent
-without destroying the header data.
+so that the image array can be safely databent without destroying the header data.
 
 Relevant bit of BMP format:
-the image array starts at the address specified
-at address 0xA.
+the image array starts at the address specified at address 0xA.
 """
 
 def decapitate(bmp_path, head_path=None, body_path=None):
