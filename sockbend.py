@@ -16,12 +16,14 @@ todo eventually?:
 import guillotine #for isolating image arrays from bmp files
 import animator #for compiling frames into a gif, and splitting a gif into its frames
 
+from PIL import Image #for converting to bmp and png
 import sox #for "audio" editing
 import math
 import glob
 import logging
 
 logging.getLogger('sox').setLevel(logging.ERROR) #suppress sox's complaints
+logging.getLogger('PIL').setLevel(logging.INFO) #maybe we should just set our own level to INFO?
 logging.basicConfig(level=logging.DEBUG)
 
 ZFILLAMOUNT = 4 #for enumerated filenames, like snake_0002.bmp
@@ -39,8 +41,19 @@ class Bender:
     See https://pysox.readthedocs.io/en/latest/api.html for all the effects it can use.
     """
     
-    def __init__(self, in_path):
-        assert in_path.endswith(".bmp")
+    def __init__(self, in_path, output_format=None):
+        """
+        in_path is the path to the image to be bent.
+        output_format defaults to the format of in_path.
+        """
+        output_format = in_path.split(".")[-1]
+        if not in_path.endswith(".bmp"): #convert non-bitmap to bitmap. even convert uppercase .BMPs
+            #maybe we could pass converted bytes straight to guillotine?
+            converted_in_path = in_path + ".bmp"
+            Image.open(in_path).save(converted_in_path)
+            logging.debug("converted to " + converted_in_path)
+            in_path = converted_in_path
+        self.output_format = output_format
         self.tfm = sox.Transformer()
         self.tfm.set_input_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
         self.tfm.set_output_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
@@ -75,7 +88,8 @@ class Bender:
         it queues the effect to happen when tfm.build is called.
         See https://pysox.readthedocs.io/en/latest/example.html for a clearer example.
         """
-        out_path = out_path or self.in_path[:-4]+"_bent.bmp"
+        if not out_path:
+            out_path = self.in_path[:-4] + "_bent." + self.output_format
         logging.info("Bending " + self.in_path + " to " + out_path)
         if effects_and_kwargs: 
             for effect, kwargs in effects_and_kwargs:
@@ -99,6 +113,8 @@ class Bender:
         
         guillotine.rescale(TEMPBODYNAME, self.body_length) #correct image array size if necessary
         guillotine.recapitate(self.in_head_path, TEMPBODYNAME, out_path) #re-attach header to image array
+        if not out_path.endswith(".bmp"):
+            Image.open(out_path).save(out_path) #re-save in correct format
         
         self.tfm.clear_effects()
 
