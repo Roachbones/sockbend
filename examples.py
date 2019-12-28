@@ -1,12 +1,16 @@
 import sockbend
 
-# Here's the bmp we will bend today. Replace it if you want.
-EXAMPLE_INPUT_BMP = "examples/socks.bmp"
+# Here's the image we will bend today. Replace it if you want.
+# Any image format works.
+EXAMPLE_IMAGE = "examples/socks.bmp"
+# Here's the image mask to apply to the first image for the mask example.
+# Set it to None to skip the mask example.
+EXAMPLE_MASK = "examples/socks_mask.png"
 # Here's the gif we will bend today. Replace it if you want.
 EXAMPLE_INPUT_GIF = "examples/golb.gif"
 
 # This object, the Bender, is used for bending a particular image.
-b = sockbend.Bender(EXAMPLE_INPUT_BMP)
+b = sockbend.Bender(EXAMPLE_IMAGE)
 
 # Here's one way to bend the image.
 # Here we call b.bend with - bear with me here - a sequence of tuples,
@@ -36,17 +40,19 @@ effects_and_kwargs = [
     )
     #Other commands could go here. We could even do the same command multiple times.
 ]
-b.bend(effects_and_kwargs, out_path="examples/ex1_highpass_500_0.6_echo.bmp")
+b.bend(
+    effects_and_kwargs,
+    #Output format changes depending on the extension you specify. Let's try a PNG.
+    out_path="examples/ex1_highpass_500_0.6_echo.png"
+)
 
-# Here's a different style of using Bender.bend.
-# It's harder and I don't recommend it; feel free to skip this example.
-# It's not really fleshed out yet and you can't use it for MultiBenders or gifs,
-# but you can use it for regular bends. It kinda looks better.
-# Here we directly call the Bend
-# This is equivalent to doing b.bend([("echo",{})], out_path="examples/ex_echo.bmp")
-b.tfm.echo() #Queue echo effect
-b.bend(out_path="examples/ex1_echo.bmp") #Bend with queued effects. This flushes the effects queue.
-
+# Here's another trick: you can use an image mask to only bend part of an image.
+if EXAMPLE_MASK: #skip this example if no mask specified
+    b_masked = sockbend.Bender(EXAMPLE_IMAGE, mask_path=EXAMPLE_MASK)
+    b_masked.bend(
+        [("allpass", {"frequency":564})],
+        out_path="examples/ex1_highpass_564_masked.png",
+    )
 
 # Now, what about gifs?
 # We can bend our single image into a gif with b.bend_to_gif.
@@ -127,3 +133,7 @@ mb.bend_varying(
     ],
     gif_path="examples/ex2_allpass_500to1700to500.gif"
 )
+
+# misc
+#b.bend([("chorus",{})])
+#b.bend([("sinc",{})]

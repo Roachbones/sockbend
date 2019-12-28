@@ -1,6 +1,6 @@
 """
 sockbend.py
-Uses sox to edit bmp files as if they were sound files,
+Uses SoX to edit bmp files as if they were sound files,
 creating some cool effects.
 
 todo:
@@ -41,7 +41,7 @@ class Bender:
     See https://pysox.readthedocs.io/en/latest/api.html for all the effects it can use.
     """
     
-    def __init__(self, in_path, output_format=None):
+    def __init__(self, in_path, mask_path=None):
         """
         in_path is the path to the image to be bent.
         output_format defaults to the format of in_path.
@@ -53,16 +53,17 @@ class Bender:
             Image.open(in_path).save(converted_in_path)
             logging.debug("converted to " + converted_in_path)
             in_path = converted_in_path
+        self.mask = Image.open(mask_path) if mask_path else None
         self.output_format = output_format
-        self.tfm = sox.Transformer()
-        self.tfm.set_input_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
-        self.tfm.set_output_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
-        self.tfm.set_globals(dither=True, verbosity=0)
         self.in_path = in_path
         self.in_head_path = ORGANS + in_path.replace("/","_") + "_head"
         self.in_body_path = ORGANS + in_path.replace("/","_") + "_body"
         self.body_length = guillotine.decapitate(in_path, self.in_head_path, self.in_body_path)
-
+        self.tfm = sox.Transformer()
+        self.tfm.set_input_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
+        self.tfm.set_output_format(file_type="raw", encoding="u-law", rate=72000, channels=1)
+        self.tfm.set_globals(dither=True) #verbosity?
+        
     def string_to_tfm_method(self, method_name):
         """
         Example: "echo" -> self.tfm.echo
@@ -93,13 +94,7 @@ class Bender:
         logging.info("Bending " + self.in_path + " to " + out_path)
         if effects_and_kwargs: 
             for effect, kwargs in effects_and_kwargs:
-                #effect can either be a string specifying the tfm method to use,
-                #or a reference to the tfm method itself.
-                if isinstance(effect, str):
-                    self.string_to_tfm_method(effect)(**kwargs)
-                else:
-                    assert effect.__self__ is self.tfm #should be a method of self.tfm
-                    effect(**kwargs)
+                self.string_to_tfm_method(effect)(**kwargs)
         
         try:
             self.tfm.build(self.in_body_path, TEMPBODYNAME)  #apply effects to bmp image array, output to TEMPBODYNAME
@@ -113,9 +108,11 @@ class Bender:
         
         guillotine.rescale(TEMPBODYNAME, self.body_length) #correct image array size if necessary
         guillotine.recapitate(self.in_head_path, TEMPBODYNAME, out_path) #re-attach header to image array
+        #file handling needs cleaned up
         if not out_path.endswith(".bmp"):
             Image.open(out_path).save(out_path) #re-save in correct format
-        
+        if self.mask:
+            Image.composite(Image.open(self.in_path), Image.open(out_path), self.mask).save(out_path)
         self.tfm.clear_effects()
 
     def bend_to_gif(self, effects_and_kwargs_sequence, out_path=None, frame_path_pattern="frames/frame_{}.bmp", duration=80):
