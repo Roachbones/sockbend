@@ -64,6 +64,7 @@ class Bender:
         Bends one input image into one output image.
         Effects can be specified in order with effects_and_kwargs,
         like self.bend([(self.tfm.highpass, {"frequency":500}), (self.tfm.echo, {})]).
+        See examples.py for more examples.
         
         Alternatively, you can call self.tfm.highpass(frequency=500) and self.tfm.echo(),
         and then just do self.bend() without specifying effects_and_kwargs.
@@ -101,15 +102,19 @@ class Bender:
         
         self.tfm.clear_effects()
 
-    def bend_to_gif(self, effects_and_kwargs_sequence, out_path=None, frame_path_pattern="frames/frame_{}.bmp", delay=8):
+    def bend_to_gif(self, effects_and_kwargs_sequence, out_path=None, frame_path_pattern="frames/frame_{}.bmp", duration=80):
         """
         Makes a gif out of a bunch of bends.
-        Basically calls self.bend a bunch of times and
-        compiles the frames into a gif.
-        effects_and_kwargs_sequence should be a sequence of
-        effects_and_kwargs things. (see self.bend for an example of those)
+        Calls self.bend a bunch of times and compiles the frames into a gif.
+        
+        effects_and_kwargs_sequence should be a sequence of effects_and_kwargs specifiers.
+        See self.bend or examples.py for information on those.
+        
         frame_name_pattern specifies how to name the frames. The {} is replaced by a zfilled frame number.
-        delay is the delay between frames, specified in hundredths of a second.
+        By default, it saves them as frames/frame_0000.bmp, frames/frame_0001.bmp, etc.
+        
+        duration is the delay between frames, specified in milliseconds. It's 80ms by default.
+        Pass a single integer for a constant duration, or a list or tuple to set the duration for each frame separately.
         """
         frame_path_pattern = frame_path_pattern or "frames/"+self.in_path[:-4]+"_{}.bmp"
         out_path = out_path or self.in_path+".gif"
@@ -118,7 +123,8 @@ class Bender:
             new_frame_path = frame_path_pattern.replace("{}",str(i).zfill(ZFILLAMOUNT))
             self.bend(effects_and_kwargs, new_frame_path)
             new_frame_paths.append(new_frame_path)
-        animator.make_gif(new_frame_paths, gif_path=out_path, delay=delay)
+        save_kwargs = {"duration":duration, "loop":0} #passed to PIL.Image.Image.save later
+        animator.make_gif(new_frame_paths, save_kwargs, out_path)
 
 class MultiBender:
     """
@@ -126,11 +132,9 @@ class MultiBender:
     """
     def __init__(self, gif_path=None, frame_paths=None):
         assert bool(frame_paths) ^ bool(gif_path) #frame_paths xor gif_path; exactly one should be supplied
-        self.delays = None
+        self.save_kwargs = {} #passed to PIL.Image.Image.save later
         if gif_path:
-            #dumps all the frames next to the gif. change later?
-            frame_paths, self.delays = animator.split_gif(gif_path)
-        
+            frame_paths, self.save_kwargs = animator.split_gif(gif_path)
         self.benders = [Bender(frame_path) for frame_path in frame_paths]
         self.number_of_frames = len(self.benders)
 
@@ -157,7 +161,7 @@ class MultiBender:
             new_frame_paths.append(new_frame_path)
         if gif_path:
             logging.info("animating bent gif: " + gif_path)
-            animator.make_gif(new_frame_paths, gif_path=gif_path, delays=self.delays)
+            animator.make_gif(new_frame_paths, self.save_kwargs, gif_path)
 
 def sin_up_down(proportion):
     """
