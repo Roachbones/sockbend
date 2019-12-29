@@ -1,5 +1,5 @@
 # Sockbend
-![PySocks](https://raw.githubusercontent.com/Roachbones/Roachbones.github.io/master/python_sock_bent.png?sanitize=true)
+![PySocks](https://raw.githubusercontent.com/Roachbones/Roachbones.github.io/master/python_sock_bent.png)
 
 Python scripts for databending images by editing them as audio data using SoX.
 
