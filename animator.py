@@ -11,16 +11,32 @@ from PIL import Image, ImageSequence
 from pygifsicle import optimize
 
 ZFILLAMOUNT = 4
-
-def make_gif(frame_paths, save_kwargs, gif_path=None):
+debug=[]
+def make_gif(frame_paths, save_kwargs, gif_path=None, mask=None):
     """
     Just takes a bunch of image paths and turns it into a gif in a way that makes sense.
     Makes a good guess for where to save the gif if gif_path is unspecified.
     """
     gif_path = gif_path or frame_paths[0][:-4]+".gif"
     print("total frames to animate: ", len(frame_paths))
-    frames = [Image.open(frame_path).quantize(dither=Image.NONE) for frame_path in frame_paths]
-    frames[0].save(gif_path, save_all=True, append_images=frames[1:], **save_kwargs)
+    frames = [Image.open(frame_path) for frame_path in frame_paths]
+    if mask:
+        #utilize gif frame-stacking to avoid inconsistent color quantization flickering in background
+        frames = [frame.quantize(255, dither=Image.NONE) for frame in frames] #only use 255/256 colors
+        mask = mask.getchannel("A").point(lambda a:0 if a<255 else 255) #only mask on fully opaque pixels
+        for frame in frames[1:]:
+            frame.paste(255, mask=mask) #use the remaining color for transparency
+    else:
+        frames = [frame.quantize(dither=Image.NONE) for frame in frames]
+    debug.append(frames)
+    frames[0].save(
+        gif_path,
+        save_all=True,
+        append_images=frames[1:],
+        dispose=1,
+        transparency=255,
+        **save_kwargs
+    )
     # PIL is bad at compressing gifs for some reason so we'll use gifsicle to optimize it
     optimize(gif_path)
     # for some reason, a round-trip through this module can make a gif twice as big. idk why

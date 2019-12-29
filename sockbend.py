@@ -137,7 +137,8 @@ class Bender:
             self.bend(effects_and_kwargs, new_frame_path)
             new_frame_paths.append(new_frame_path)
         save_kwargs = {"duration":duration, "loop":0} #passed to PIL.Image.Image.save later
-        animator.make_gif(new_frame_paths, save_kwargs, out_path)
+        animator.make_gif(new_frame_paths, save_kwargs, out_path, mask=self.mask)
+        logging.info("saved gif to " + out_path)
 
 class MultiBender:
     """
