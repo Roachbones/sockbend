@@ -79,9 +79,8 @@ b.bend_to_gif(
 # Here's an example like the last one, but with a seamless loop.
 b.bend_to_gif(
     [[("allpass", {"frequency":500+1200*sockbend.sin_up_down(i/24)})] for i in range(24)],
-    out_path="examples/ex1_allpass_500to1700to500.gif",
+    out_path="examples/ex1_allpass_500to1700to500.gif"
 )
-
 
 # What if we already have a gif and we want to bend it into another gif?
 # For that, we'll want to use a MultiBender.
@@ -119,7 +118,15 @@ mb.bend_varying(
     gif_path="examples/ex2_bass_0.2to2.2to0.2.gif"
 )
 
-# Here's a similar one. I like the allpass filter.
+# We can use masks with bend_to_gif as well, to generate cinematographs.
+# Here's the last example but with the masked Bender:
+b_masked.bend_to_gif(
+    [[("allpass", {"frequency":500+1200*sockbend.sin_up_down(i/24)})] for i in range(24)],
+    out_path="examples/ex1_allpass_500to1700to500_masked.gif"
+)
+
+
+# extra examples
 mb.bend_varying(
     [
         [
@@ -132,7 +139,7 @@ mb.bend_varying(
         ] for i in range(n)
     ],
     gif_path="examples/ex2_allpass_500to1700to500.gif"
-)
+)   
 
 # misc
 #b.bend([("chorus",{})])
