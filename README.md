@@ -10,7 +10,7 @@ Databending is editing files as if they are of a different format. Specifically,
 Sockbend requires [pysox](https://github.com/rabitt/pysox) and Pillow. If you're on Ubuntu, the following commands should install everything:
 
 ```
-apt-get install sox
+sudo apt install sox
 pip3 install sox
 git clone https://github.com/Roachbones/sockbend.git
 ```
